@@ -1,5 +1,6 @@
 ﻿using Application.Features.Brands.Dtos;
 using Application.Features.Brands.Models;
+using Application.Features.Brands.Rules;
 using Application.Services.Repositories;
 using AutoMapper;
 using Core.Application.Requests;
@@ -27,11 +28,13 @@ namespace Application.Features.Brands.Queries.GetByIdBrand
             {
                 private readonly IBrandRepository _brandRepository;
                 private readonly IMapper _mapper;
+                private readonly BrandBusinessRules _brandBusinessRules;
 
-                public GetListBrandQueryHandler(IBrandRepository brandRepository, IMapper mapper)
+                public GetListBrandQueryHandler(IBrandRepository brandRepository, IMapper mapper,BrandBusinessRules brandBusinessRules)
                 {
                     _brandRepository = brandRepository;
                     _mapper = mapper;
+                    _brandBusinessRules = brandBusinessRules;
                 }
 
 
@@ -39,6 +42,7 @@ namespace Application.Features.Brands.Queries.GetByIdBrand
                 public async Task<BrandGetByIdDto> Handle(GetByIdBrandQuery request, CancellationToken cancellationToken)
                 {
                     Brand? brand = await _brandRepository.GetAsync(b => b.Id == request.Id);
+                    _brandBusinessRules.BrandShouldExistWhenRequested(brand);
                     BrandGetByIdDto brandGetByIdDto = _mapper.Map<BrandGetByIdDto>(brand);
                     return brandGetByIdDto;
                 }
